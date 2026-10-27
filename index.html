@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080d20">
+<title>Niraj Poll Race</title>
+<style>
+:root{
+  --bg:#070b19;--panel:#101831;--panel2:#0b1329;--line:#253354;--text:#f3f6ff;
+  --muted:#a5b2d0;--cyan:#36e5ff;--purple:#a879ff;--gold:#ffd166;--pink:#ff6fae;
+  --green:#5df2b1;--danger:#ff6f83;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+ background:radial-gradient(ellipse at 15% 0%,#14244a 0,transparent 42%),radial-gradient(ellipse at 90% 10%,#281647 0,transparent 35%),var(--bg)}
+button,input{font:inherit}
+button{cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.wrap{width:min(1120px,100%);margin:auto;padding:24px 18px 40px}
+header{text-align:center;padding:18px 0 22px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--cyan);font-size:.75rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+h1{font-size:clamp(2rem,6vw,3.6rem);letter-spacing:-.045em;line-height:1.03;margin:12px 0 9px}
+h1 span{background:linear-gradient(90deg,var(--cyan),#a5a4ff,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{color:var(--muted);margin:0;font-size:.98rem}
+.timer-panel{margin:0 auto 18px;max-width:720px;padding:20px 16px 18px;text-align:center;background:linear-gradient(135deg,#111e3b,#12132d);border:1px solid #34466c;border-radius:22px;box-shadow:0 14px 40px #0004,inset 0 1px #ffffff0b}
+.timer-label{color:var(--muted);font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800}
+#timer{font-variant-numeric:tabular-nums;font-size:clamp(2.7rem,9vw,4.7rem);font-weight:850;letter-spacing:.04em;line-height:1.2;margin:7px 0 12px;text-shadow:0 0 24px #36e5ff2b}
+.status{min-height:24px;color:var(--muted);font-size:.9rem}
+.status strong{color:var(--cyan)}
+.controls{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:14px}
+.btn{border:1px solid #3a4b70;border-radius:12px;padding:10px 16px;color:var(--text);font-weight:750;background:#1b2746;transition:transform .15s,border-color .15s,filter .15s}
+.btn:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.12);border-color:#7b92c4}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn-primary{color:#041321;background:linear-gradient(100deg,var(--cyan),#8af5ff);border-color:transparent;box-shadow:0 5px 20px #36e5ff20}
+.btn-pause{background:#282044;border-color:#6650a0}
+.btn-reset{background:#2a1c2e;border-color:#75405f}
+.section{margin-top:20px;background:#0c1429d9;border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 12px 32px #0002}
+.section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+h2{font-size:1.08rem;margin:0;letter-spacing:-.015em}
+.section-heading p{color:var(--muted);font-size:.8rem;margin:4px 0 0}
+.count-pill{white-space:nowrap;border:1px solid #34466b;background:#111e3b;color:#c9d7f7;padding:6px 9px;border-radius:99px;font-size:.73rem;font-weight:800}
+.players-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.player-card{--accent:var(--cyan);min-width:0;position:relative;padding:12px 10px 11px;border-radius:15px;border:1px solid color-mix(in srgb,var(--accent) 45%,#253354);background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 9%,#111a33),#0b1225 72%);box-shadow:inset 0 1px #ffffff08;overflow:hidden}
+.player-card:before{content:"";position:absolute;top:0;left:12px;right:12px;height:2px;background:var(--accent);box-shadow:0 0 12px var(--accent);opacity:.9}
+.player-top{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-bottom:8px}
+.player-number{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;font-weight:850;color:var(--accent)}
+.player-state{font-size:.65rem;color:var(--muted);font-weight:700}
+.avatar{width:66px;height:66px;margin:0 auto 8px;border-radius:17px;display:grid;place-items:center;overflow:hidden;border:1px solid color-mix(in srgb,var(--accent) 65%,#263657);background:linear-gradient(145deg,#1b2947,#0b1123);color:var(--accent);font-size:1.35rem;font-weight:900}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.upload-label{display:block;text-align:center;color:var(--accent);font-size:.75rem;font-weight:800;border:1px dashed color-mix(in srgb,var(--accent) 55%,#35415e);border-radius:9px;padding:6px 4px;margin-bottom:8px;cursor:pointer}
+.upload-label:hover{background:#ffffff08}
+.photo-input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.name-label{display:block;font-size:.7rem;color:var(--muted);margin:0 0 4px}
+.name-input{width:100%;min-width:0;border:1px solid #2c3b5c;border-radius:9px;background:#080f21;color:var(--text);padding:8px 7px;font-size:.82rem;font-weight:700}
+.name-input:disabled{opacity:.75}
+.finish-time{margin:9px 0 8px;padding:7px 4px;border-radius:9px;text-align:center;background:#070d1b;border:1px solid #202d49;color:var(--muted);font-variant-numeric:tabular-nums;font-size:.75rem}
+.finish-time strong{display:block;color:var(--text);font-size:1.02rem;margin-top:2px}
+.finish-btn{width:100%;padding:10px 5px;font-size:.76rem;border-radius:10px;border:1px solid color-mix(in srgb,var(--accent) 55%,#273653);background:color-mix(in srgb,var(--accent) 13%,#101a32);color:var(--text);font-weight:850}
+.finish-btn:disabled{opacity:.42;cursor:not-allowed}
+.leaderboard{width:100%;border-collapse:collapse}
+.leaderboard th{text-align:left;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;padding:10px 8px;border-bottom:1px solid #2a3856}
+.leaderboard td{padding:11px 8px;border-bottom:1px solid #1c2944;font-size:.88rem}
+.leaderboard tr:last-child td{border-bottom:0}
+.rank{font-weight:900;width:56px}
+.medal{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:9px;background:#17213a;font-size:1.05rem}.rank-label{margin-left:5px}.plain-rank{display:inline-block;color:#b9c5dc;font-weight:900;padding-left:2px}
+.gold{color:#ffd166}.silver{color:#dce5f5}.bronze{color:#d99a70}
+.person{display:flex;align-items:center;gap:9px;min-width:0}
+.mini-avatar{width:34px;height:34px;border-radius:10px;overflow:hidden;display:grid;place-items:center;background:#17213a;border:1px solid #334263;color:var(--cyan);font-weight:900;font-size:.75rem;flex:none}
+.mini-avatar img{width:100%;height:100%;object-fit:cover}
+.person-name{font-weight:800;overflow-wrap:anywhere}
+.finish-cell{font-variant-numeric:tabular-nums;font-weight:850;white-space:nowrap}
+.racing{color:var(--muted);font-weight:650}
+.complete-banner{display:none;margin-top:12px;padding:12px;border:1px solid #4c8d78;border-radius:12px;background:#102c2a;color:var(--green);text-align:center;font-weight:900}
+.complete-banner.show{display:block}
+.instructions{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.instructions ol{padding-left:20px;margin:10px 0 0;color:#c4cee4;font-size:.87rem;line-height:1.75}
+.instructions li::marker{color:var(--cyan);font-weight:900}
+.tip{padding:12px;border:1px solid #2d3c5d;border-radius:12px;background:#111b34;color:var(--muted);font-size:.84rem;line-height:1.6}
+.tip strong{color:var(--text)}
+footer{text-align:center;color:#7f8cad;font-size:.75rem;padding:22px 8px 0}
+#liveMessage{min-height:20px;color:var(--gold);font-size:.82rem;margin-top:8px}
+@media(max-width:760px){
+ .wrap{padding:14px 10px 28px}header{padding:12px 0 18px}.timer-panel{padding:17px 12px;border-radius:18px}
+ .section{padding:12px;border-radius:16px}.players-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .player-card{padding:11px 9px}.avatar{width:58px;height:58px}.section-heading{align-items:flex-start}
+ .instructions{grid-template-columns:1fr;gap:10px}
+}
+@media(max-width:360px){.wrap{padding-left:7px;padding-right:7px}.players-grid{gap:7px}.player-card{padding:10px 7px}.btn{padding:9px 12px}.leaderboard th,.leaderboard td{padding:9px 5px;font-size:.78rem}.mini-avatar{width:29px;height:29px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow"><span class="dot"></span> Four-player challenge</div>
+  <h1><span>NIRAJ POLL RACE</span></h1>
+  <p class="subtitle">One race. Four players. One leaderboard.</p>
+</header>
+
+<section class="timer-panel" aria-label="Shared race timer and controls">
+  <div class="timer-label">Shared Race Timer</div>
+  <div id="timer" role="timer" aria-live="off">00:00.0</div>
+  <div id="status" class="status" aria-live="polite">Ready to race? Set your lineup below.</div>
+  <div class="controls">
+    <button id="startBtn" class="btn btn-primary" type="button">▶ Start Race</button>
+    <button id="pauseBtn" class="btn btn-pause" type="button" disabled>Ⅱ Pause</button>
+    <button id="resumeBtn" class="btn btn-pause" type="button" disabled>▶ Resume</button>
+    <button id="resetBtn" class="btn btn-reset" type="button">↻ Reset Round</button>
+  </div>
+  <div id="liveMessage" aria-live="polite"></div>
+</section>
+
+<section class="section" aria-labelledby="playersTitle">
+  <div class="section-heading">
+    <div><h2 id="playersTitle">Players / Race Lineup</h2><p>Four compact cards, one shared starting line.</p></div>
+    <span class="count-pill">4 PLAYERS</span>
+  </div>
+  <div class="players-grid" id="playersGrid">
+    <article class="player-card" data-player="0" style="--accent:#36e5ff">
+      <div class="player-top"><span class="player-number">Player 01</span><span class="player-state" id="state-0">READY</span></div>
+      <div class="avatar" id="avatar-0"><span>1</span></div>
+      <label class="upload-label" for="photo-0">＋ Add Photo</label>
+      <input class="photo-input" id="photo-0" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-label="Add or change photo for Player 1">
+      <label class="name-label" for="name-0">Player name</label>
+      <input class="name-input" id="name-0" type="text" maxlength="32" value="Player 1" autocomplete="off">
+      <div class="finish-time">Finish time<strong id="time-0">— — —</strong></div>
+      <button class="finish-btn" id="finish-0" type="button" disabled>I Finished!</button>
+    </article>
+    <article class="player-card" data-player="1" style="--accent:#b38aff">
+      <div class="player-top"><span class="player-number">Player 02</span><span class="player-state" id="state-1">READY</span></div>
+      <div class="avatar" id="avatar-1"><span>2</span></div>
+      <label class="upload-label" for="photo-1">＋ Add Photo</label>
+      <input class="photo-input" id="photo-1" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-label="Add or change photo for Player 2">
+      <label class="name-label" for="name-1">Player name</label>
+      <input class="name-input" id="name-1" type="text" maxlength="32" value="Player 2" autocomplete="off">
+      <div class="finish-time">Finish time<strong id="time-1">— — —</strong></div>
+      <button class="finish-btn" id="finish-1" type="button" disabled>I Finished!</button>
+    </article>
+    <article class="player-card" data-player="2" style="--accent:#ffd166">
+      <div class="player-top"><span class="player-number">Player 03</span><span class="player-state" id="state-2">READY</span></div>
+      <div class="avatar" id="avatar-2"><span>3</span></div>
+      <label class="upload-label" for="photo-2">＋ Add Photo</label>
+      <input class="photo-input" id="photo-2" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-label="Add or change photo for Player 3">
+      <label class="name-label" for="name-2">Player name</label>
+      <input class="name-input" id="name-2" type="text" maxlength="32" value="Player 3" autocomplete="off">
+      <div class="finish-time">Finish time<strong id="time-2">— — —</strong></div>
+      <button class="finish-btn" id="finish-2" type="button" disabled>I Finished!</button>
+    </article>
+    <article class="player-card" data-player="3" style="--accent:#ff78b7">
+      <div class="player-top"><span class="player-number">Player 04</span><span class="player-state" id="state-3">READY</span></div>
+      <div class="avatar" id="avatar-3"><span>4</span></div>
+      <label class="upload-label" for="photo-3">＋ Add Photo</label>
+      <input class="photo-input" id="photo-3" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-label="Add or change photo for Player 4">
+      <label class="name-label" for="name-3">Player name</label>
+      <input class="name-input" id="name-3" type="text" maxlength="32" value="Player 4" autocomplete="off">
+      <div class="finish-time">Finish time<strong id="time-3">— — —</strong></div>
+      <button class="finish-btn" id="finish-3" type="button" disabled>I Finished!</button>
+    </article>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="leaderboardTitle">
+  <div class="section-heading"><div><h2 id="leaderboardTitle">🏁 Live Leaderboard</h2><p>Finishers are ranked by the fastest recorded time.</p></div><span class="count-pill" id="finishCount">0 / 4 FINISHED</span></div>
+  <div style="overflow-x:auto">
+    <table class="leaderboard">
+      <thead><tr><th scope="col">Rank</th><th scope="col">Player</th><th scope="col">Finish Time</th></tr></thead>
+      <tbody id="leaderboardBody">
+        <tr><td class="rank">—</td><td><div class="person"><div class="mini-avatar">1</div><span class="person-name">Player 1</span></div></td><td class="racing">Racing…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="complete-banner" id="completeBanner" role="status">🏆 Race Complete! All four players have finished.</div>
+</section>
+
+<section class="section" aria-labelledby="howTitle">
+  <div class="section-heading"><div><h2 id="howTitle">How to Play</h2><p>Get set, start together, and finish as fast as you can.</p></div></div>
+  <div class="instructions">
+    <div>
+      <ol>
+        <li>Add a photo for each player if desired.</li>
+        <li>Enter each player's name.</li>
+        <li>Make sure everyone is ready.</li>
+        <li>Click <strong>Start Race</strong> to start the shared timer.</li>
+        <li>Complete the assigned question or task.</li>
+        <li>Click <strong>I Finished!</strong> immediately after completing it.</li>
+        <li>Check the leaderboard for the final rankings.</li>
+      </ol>
+    </div>
+    <div class="tip">
+      <strong>Race controls</strong><br>
+      <strong>Pause:</strong> Freeze the timer and temporarily disable unfinished players' finish buttons.<br>
+      <strong>Resume:</strong> Continue from the exact elapsed time. Paused time is not counted.<br>
+      <strong>Reset Round:</strong> Clear finish times and rankings and return to ready mode. Player photos stay in place. Names become editable again.<br><br>
+      <strong>Photo privacy:</strong> Images are processed locally in this browser and are never uploaded.
+    </div>
+  </div>
+</section>
+<footer>NIRAJ POLL RACE · Built for friendly competition · Works offline in your browser</footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const PLAYER_COUNT = 4;
+  const DEFAULT_NAMES = ['Player 1','Player 2','Player 3','Player 4'];
+  const state = {
+    phase: 'ready', // ready, running, paused, complete
+    startedAt: 0,
+    elapsedBeforeSegment: 0,
+    rafId: 0,
+    players: Array.from({length: PLAYER_COUNT}, (_, i) => ({
+      name: DEFAULT_NAMES[i], finishTime: null, photoUrl: null, photoFile: null
+    }))
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const timerEl = $('timer');
+  const statusEl = $('status');
+  const liveMessage = $('liveMessage');
+  const startBtn = $('startBtn');
+  const pauseBtn = $('pauseBtn');
+  const resumeBtn = $('resumeBtn');
+  const resetBtn = $('resetBtn');
+
+  function formatTime(ms) {
+    const tenths = Math.floor(Math.max(0, ms) / 100);
+    const minutes = Math.floor(tenths / 600);
+    const seconds = Math.floor((tenths % 600) / 10);
+    const decimal = tenths % 10;
+    return `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}.${decimal}`;
+  }
+  function elapsedNow() {
+    return state.phase === 'running'
+      ? state.elapsedBeforeSegment + (performance.now() - state.startedAt)
+      : state.elapsedBeforeSegment;
+  }
+  function setStatus(message) { statusEl.textContent = message; }
+  function announce(message) { liveMessage.textContent = message; }
+  function displayTimer() { timerEl.textContent = formatTime(elapsedNow()); }
+
+  function safeName(index) {
+    const value = state.players[index].name.trim().slice(0,32);
+    return value || DEFAULT_NAMES[index];
+  }
+  function syncNames() {
+    state.players.forEach((player, i) => {
+      player.name = safeName(i);
+      const input = $('name-' + i);
+      if (input.value !== player.name && document.activeElement !== input) input.value = player.name;
+    });
+    renderLeaderboard();
+  }
+  function updateControls() {
+    const running = state.phase === 'running';
+    const locked = state.phase !== 'ready';
+    startBtn.disabled = locked;
+    pauseBtn.disabled = !running;
+    resumeBtn.disabled = state.phase !== 'paused';
+    state.players.forEach((p, i) => {
+      $('name-' + i).disabled = locked;
+      $('photo-' + i).disabled = locked;
+      $('finish-' + i).disabled = !running || p.finishTime !== null;
+      $('state-' + i).textContent = p.finishTime !== null ? 'FINISHED' : (running ? 'RACING' : state.phase === 'paused' ? 'PAUSED' : state.phase === 'complete' ? 'DONE' : 'READY');
+    });
+  }
+  function renderPlayerTimes() {
+    state.players.forEach((p, i) => {
+      $('time-' + i).textContent = p.finishTime === null ? '— — —' : formatTime(p.finishTime);
+      $('finish-' + i).textContent = p.finishTime === null ? 'I Finished!' : '✓ Finished';
+    });
+  }
+  function renderLeaderboard() {
+    const body = $('leaderboardBody');
+    body.replaceChildren();
+    const finishers = state.players
+      .map((p, i) => ({...p, index:i}))
+      .filter(p => p.finishTime !== null)
+      .sort((a,b) => a.finishTime - b.finishTime || a.index - b.index);
+    const unfinished = state.players
+      .map((p, i) => ({...p, index:i}))
+      .filter(p => p.finishTime === null);
+
+    const rows = [
+      ...finishers.map((p, i) => ({...p, rank:i+1})),
+      ...unfinished.map(p => ({...p, rank:null}))
+    ];
+    rows.forEach(p => {
+      const tr = document.createElement('tr');
+      const rankCell = document.createElement('td');
+      rankCell.className = 'rank';
+      if (p.rank >= 1 && p.rank <= 3) {
+        const medal = document.createElement('span');
+        medal.className = 'medal ' + (p.rank === 1 ? 'gold' : p.rank === 2 ? 'silver' : 'bronze');
+        medal.setAttribute('aria-label', p.rank === 1 ? 'Gold medal' : p.rank === 2 ? 'Silver medal' : 'Bronze medal');
+        medal.textContent = p.rank === 1 ? '🥇' : p.rank === 2 ? '🥈' : '🥉';
+        const rankLabel = document.createElement('span');
+        rankLabel.className = 'rank-label';
+        rankLabel.textContent = p.rank === 1 ? '1st' : p.rank === 2 ? '2nd' : '3rd';
+        rankCell.append(medal, rankLabel);
+      } else if (p.rank === 4) {
+        // Fourth place is deliberately plain text: no medal emoji, badge, or medal styling.
+        const plainRank = document.createElement('span');
+        plainRank.className = 'plain-rank';
+        plainRank.textContent = '4th';
+        rankCell.appendChild(plainRank);
+      } else {
+        rankCell.textContent = '—';
+      }
+      tr.appendChild(rankCell);
+
+      const playerCell = document.createElement('td');
+      const person = document.createElement('div'); person.className = 'person';
+      const avatar = document.createElement('div'); avatar.className = 'mini-avatar';
+      if (p.photoUrl) {
+        const img = document.createElement('img');
+        img.alt = `${p.name} photo`; img.src = p.photoUrl;
+        img.addEventListener('error', () => { avatar.textContent = String(p.index + 1); });
+        avatar.appendChild(img);
+      } else avatar.textContent = String(p.index + 1);
+      const name = document.createElement('span'); name.className = 'person-name'; name.textContent = p.name;
+      person.append(avatar, name); playerCell.appendChild(person); tr.appendChild(playerCell);
+
+      const timeCell = document.createElement('td');
+      if (p.finishTime !== null) { timeCell.className = 'finish-cell'; timeCell.textContent = formatTime(p.finishTime); }
+      else { timeCell.className = 'racing'; timeCell.textContent = state.phase === 'ready' ? 'Not started' : state.phase === 'paused' ? 'Paused' : 'Racing…'; }
+      tr.appendChild(timeCell);
+      body.appendChild(tr);
+    });
+    $('finishCount').textContent = `${finishers.length} / ${PLAYER_COUNT} FINISHED`;
+    $('completeBanner').classList.toggle('show', finishers.length === PLAYER_COUNT);
+  }
+  function updateUI() {
+    displayTimer();
+    renderPlayerTimes();
+    updateControls();
+    renderLeaderboard();
+  }
+  function tick() {
+    if (state.phase !== 'running') return;
+    displayTimer();
+    state.rafId = requestAnimationFrame(tick);
+  }
+  function startRace() {
+    if (state.phase !== 'ready') return;
+    syncNames();
+    state.phase = 'running';
+    state.elapsedBeforeSegment = 0;
+    state.startedAt = performance.now();
+    state.rafId = requestAnimationFrame(tick);
+    setStatus('Race is live! Finish as soon as your task is complete.');
+    announce('Race started. All four players share the same timer.');
+    updateUI();
+  }
+  function pauseRace() {
+    if (state.phase !== 'running') return;
+    state.elapsedBeforeSegment += performance.now() - state.startedAt;
+    state.phase = 'paused';
+    cancelAnimationFrame(state.rafId);
+    displayTimer();
+    setStatus('Race paused. The timer is frozen.');
+    announce('Race paused.');
+    updateUI();
+  }
+  function resumeRace() {
+    if (state.phase !== 'paused') return;
+    state.phase = 'running';
+    state.startedAt = performance.now();
+    state.rafId = requestAnimationFrame(tick);
+    setStatus('Race resumed. Keep going!');
+    announce('Race resumed.');
+    updateUI();
+  }
+  function finishPlayer(index) {
+    if (state.phase !== 'running' || state.players[index].finishTime !== null) return;
+    // Capture elapsed time at the click, independently of when the next animation frame runs.
+    state.players[index].finishTime = elapsedNow();
+    const playerName = safeName(index);
+    const allFinished = state.players.every(p => p.finishTime !== null);
+    if (allFinished) {
+      state.elapsedBeforeSegment = elapsedNow();
+      state.phase = 'complete';
+      cancelAnimationFrame(state.rafId);
+      setStatus('All players have crossed the finish line.');
+      announce(`Race complete! ${playerName} finished. All four players are done.`);
+    } else {
+      setStatus(`${playerName} finished! The race continues for the remaining players.`);
+      announce(`${playerName} recorded a finish time of ${formatTime(state.players[index].finishTime)}.`);
+    }
+    updateUI();
+  }
+  function resetRound() {
+    if (state.phase === 'running' || state.phase === 'paused') {
+      const confirmed = window.confirm('Reset this active race? All finish times and rankings will be cleared. Player photos will be kept.');
+      if (!confirmed) return;
+    }
+    cancelAnimationFrame(state.rafId);
+    state.phase = 'ready';
+    state.startedAt = 0;
+    state.elapsedBeforeSegment = 0;
+    state.players.forEach((p, i) => {
+      p.finishTime = null;
+      const input = $('name-' + i);
+      p.name = input.value.trim().slice(0,32) || DEFAULT_NAMES[i];
+      input.value = p.name;
+    });
+    setStatus('Ready to race? Set your lineup below.');
+    announce('Round reset. Photos have been preserved.');
+    updateUI();
+  }
+
+  startBtn.addEventListener('click', startRace);
+  pauseBtn.addEventListener('click', pauseRace);
+  resumeBtn.addEventListener('click', resumeRace);
+  resetBtn.addEventListener('click', resetRound);
+
+  state.players.forEach((player, i) => {
+    $('name-' + i).addEventListener('input', event => {
+      if (state.phase !== 'ready') return;
+      player.name = event.target.value.slice(0,32);
+      renderLeaderboard();
+    });
+    $('finish-' + i).addEventListener('click', () => finishPlayer(i));
+    $('photo-' + i).addEventListener('change', event => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (state.phase !== 'ready') {
+        announce('Photos can only be changed before the race starts.');
+        event.target.value = '';
+        return;
+      }
+      const allowedTypes = ['image/jpeg','image/png','image/webp'];
+      const extensionOkay = /\.(jpe?g|png|webp)$/i.test(file.name);
+      if (!allowedTypes.includes(file.type) || !extensionOkay) {
+        announce('Unsupported file. Please choose a JPG, JPEG, PNG, or WEBP image.');
+        event.target.value = '';
+        return;
+      }
+      if (player.photoUrl) URL.revokeObjectURL(player.photoUrl);
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        player.photoUrl = url;
+        player.photoFile = file;
+        const avatar = $('avatar-' + i);
+        avatar.replaceChildren();
+        const preview = document.createElement('img');
+        preview.alt = `Photo preview for ${safeName(i)}`;
+        preview.src = url;
+        preview.addEventListener('error', () => {
+          avatar.textContent = String(i + 1);
+          announce(`The selected image for Player ${i + 1} could not be displayed.`);
+        });
+        avatar.appendChild(preview);
+        renderLeaderboard();
+        announce(`Photo added for ${safeName(i)}. It stays on this device.`);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        event.target.value = '';
+        announce('That image could not be loaded. Please try another photo.');
+      };
+      img.src = url;
+    });
+  });
+
+  // Release browser object URLs when the page is closed or refreshed.
+  window.addEventListener('beforeunload', () => {
+    state.players.forEach(p => { if (p.photoUrl) URL.revokeObjectURL(p.photoUrl); });
+  });
+
+  updateUI();
+})();
+</script>
+</body>
+</html>
